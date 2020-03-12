@@ -7,8 +7,36 @@ from matplotlib import pyplot as plt
 from matplotlib import colors
 from matplotlib.patches import Rectangle
 from nav_msgs.msg import OccupancyGrid
+from scipy.optimize import minimize
+from example_scenarios import ReachAvoid
 
 my_occupany_grid = OccupancyGrid()
+
+# spits out optimal trajectory
+def optimize_trajectory(full_spec):
+	x0 = np.asarray([2,0,20,0])[:,np.newaxis]
+	test = ReachAvoid(x0)
+	test.full_specification = full_spec
+	
+	u_guess = np.zeros((2,21)).flatten() 
+
+	result = minimize(test.cost_function, u_guess,
+		method='Nelder-Mead',
+		options={
+				'disp':True,
+				'adaptive':True,
+				'maxiter':15000,
+				'fatol':1e-6,
+				'xatol':1e-6
+			}
+		)
+
+	optimal_control = result.x.reshape((2,21))
+	
+	optimal_trajectory = test.STL_signal(optimal_control)
+
+	print('optimal trajectory', optimal_trajectory)
+	return optimal_trajectory
 
 # returns an STL formula indicating the signal is outside of the rectangle
 def in_rectangle_formula(xmin,xmax,ymin,ymax):
@@ -25,7 +53,7 @@ def in_rectangle_formula(xmin,xmax,ymin,ymax):
 	return in_rectangle
 
 # this will be where the STL translation will actually take place
-def generate_full_specification(occupied_cells):
+def generate_full_specification(occupied_cells, resolution):
 	
 	# list containing the x,y coordinates of the occupied grid cells
 	objects_to_avoid = []
@@ -33,12 +61,13 @@ def generate_full_specification(occupied_cells):
 	# generating a STL formula for every occupied cell
 	for cell in occupied_cells:
 		# the x and y coordinates that are passed to this function are the lower left hand corner
-		xmax = cell[0] + 1
-		ymax = cell[1] + 1
+		xmax = cell[0] + resolution
+		ymax = cell[1] + resolution
 		obstacle = in_rectangle_formula(cell[0], xmax, cell[1], ymax)
 		# STL formula is currently defined as inside the obstacle --> not outside --> thus negation is used
-		# The obstacles should always be avoided --> make sure t interval includes interesting part of signal
-		obstacle_avoidance = obstacle.negation().always(0,84)
+		# The obstacles should always be avoided --> make sure t interval includes interesting part of signal (i.e. the part of the trajectory
+		# that we are interested in analyzing the robustness score for
+		obstacle_avoidance = obstacle.negation().always(0,20)
 	 	# adding the individual STL formulas to an array
 		objects_to_avoid.append(obstacle_avoidance)
 	
@@ -53,8 +82,8 @@ def generate_full_specification(occupied_cells):
 def do_stuff_with_map(map):
 	# plotting the map
 	fig, ax = plt.subplots(1)
-	ax.set_xlim(0, map.info.width)
-	ax.set_ylim(0, map.info.height)	
+	ax.set_xlim(0, map.info.width * map.info.resolution)
+	ax.set_ylim(0, map.info.height * map.info.resolution)	
 	
 	occupied_cells = []
 	
@@ -62,17 +91,17 @@ def do_stuff_with_map(map):
 	for cell in range(len(map.data)):
 		# calculating x,y coordinates of lower left hand corner of cell
 		y_coordinate = (int)(cell / map.info.width)
-		x_coordinate = cell - (y_coordinate * map.info.width)
+		x_coordinate = (int)(cell - (y_coordinate * map.info.width))
 		
 		# if a cell is occupied, the value is 100
 		if map.data[cell] == 100:
 			# plot the occupied cells on the map as red squares
-			ax.add_patch ( Rectangle( (x_coordinate,y_coordinate),1,1,color='red', alpha=0.5) )
+			ax.add_patch ( Rectangle( ((x_coordinate * map.info.resolution), (y_coordinate * map.info.resolution)), 1 * map.info.resolution, 1*map.info.resolution,color='red', alpha=0.5) )
 			# an array containing the lower left hand x & y coordinates of the occupied grid cells
-			occupied_cells.append( (x_coordinate, y_coordinate) )
+			occupied_cells.append( (x_coordinate * map.info.resolution, y_coordinate * map.info.resolution) )
 	
 	# generating the robustness function for the cells contained within the occupied cells array  
-	complete_function = generate_full_specification(occupied_cells)		
+	complete_function = generate_full_specification(occupied_cells, map.info.resolution)		
 	
 	"""
 
@@ -82,20 +111,19 @@ def do_stuff_with_map(map):
 
 	"""
 	
-	ax.add_patch ( Rectangle( (30,30),1,1, color = 'green',alpha=0.5) ) 
-	at_goal = in_rectangle_formula(30,31,30,31)
-	goal_achieved = at_goal.eventually(0,84)
+	ax.add_patch ( Rectangle( (20,15),1,1, color = 'green',alpha=0.5) ) 
+	at_goal = in_rectangle_formula(20,21,15,16)
+	goal_achieved = at_goal.eventually(0,20)
 	full_spec = complete_function.conjunction(goal_achieved)
 	
-	t1 = np.array([[2.5*i,0.40*i] for i in range(85)])
-	p1 = ax.scatter(t1[:,0],t1[:,1],label="$\\rho$ = %0.2f" % full_spec.robustness(t1,0))
+	optimal_trajectory = optimize_trajectory(full_spec)
+	
+	x_position = optimal_trajectory[0,:]
+	y_position = optimal_trajectory[1,:]
 
-	t2 = np.array([[2.5*i,0.03*i*i] for i in range(85)])
-	p2 = ax.scatter(t2[:,0],t2[:,1],label="$\\rho$ = %0.2f" % full_spec.robustness(t2,0))
- 
-		
-	plt.legend()
-	plt.title("%sx%s w/ %s resolution" % (map.info.width, map.info.height, map.info.resolution))
+	ax.scatter(x_position, y_position)
+	
+	plt.title("%s by %s m Map " % ((int)(map.info.width * map.info.resolution), (int)(map.info.height * map.info.resolution)))
 	plt.show()
 
 # callback function for the map_subscriber --> stores the read occupancy grid in a global occupancy grid
