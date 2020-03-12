@@ -13,7 +13,7 @@ my_occupany_grid = OccupancyGrid()
 # returns an STL formula indicating the signal is outside of the rectangle
 def in_rectangle_formula(xmin,xmax,ymin,ymax):
 	above_xmin = STLFormula(lambda s, t : s[t,0] - xmin)
-	below_xmax = STLFormula(lambda s, t : s[t,0] + xmax)
+	below_xmax = STLFormula(lambda s, t : -s[t,0] + xmax)
 	above_ymin = STLFormula(lambda s, t : s[t,1] - ymin)
 	below_ymax = STLFormula(lambda s, t : -s[t,1] + ymax)
 
@@ -37,8 +37,8 @@ def generate_full_specification(occupied_cells):
 		ymax = cell[1] + 1
 		obstacle = in_rectangle_formula(cell[0], xmax, cell[1], ymax)
 		# STL formula is currently defined as inside the obstacle --> not outside --> thus negation is used
-		# The obstacles should always be avoided
-		obstacle_avoidance = obstacle.negation().always(0,20)
+		# The obstacles should always be avoided --> make sure t interval includes interesting part of signal
+		obstacle_avoidance = obstacle.negation().always(0,84)
 	 	# adding the individual STL formulas to an array
 		objects_to_avoid.append(obstacle_avoidance)
 	
@@ -84,12 +84,16 @@ def do_stuff_with_map(map):
 	
 	ax.add_patch ( Rectangle( (30,30),1,1, color = 'green',alpha=0.5) ) 
 	at_goal = in_rectangle_formula(30,31,30,31)
-	goal_achieved = at_goal.eventually(0,20)
+	goal_achieved = at_goal.eventually(0,84)
 	full_spec = complete_function.conjunction(goal_achieved)
 	
-	t1 = np.array([[0.4*i,0.45*i] for i in range(25)])
-	p1 = ax.plot(t1[:,0],t1[:,1],label="$\\rho$ = %0.2f" % full_spec.robustness(t1,0))
-	
+	t1 = np.array([[2.5*i,0.40*i] for i in range(85)])
+	p1 = ax.scatter(t1[:,0],t1[:,1],label="$\\rho$ = %0.2f" % full_spec.robustness(t1,0))
+
+	t2 = np.array([[2.5*i,0.03*i*i] for i in range(85)])
+	p2 = ax.scatter(t2[:,0],t2[:,1],label="$\\rho$ = %0.2f" % full_spec.robustness(t2,0))
+ 
+		
 	plt.legend()
 	plt.title("%sx%s w/ %s resolution" % (map.info.width, map.info.height, map.info.resolution))
 	plt.show()
