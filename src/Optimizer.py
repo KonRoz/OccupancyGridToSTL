@@ -28,7 +28,24 @@ class Optimizer:
 		# formulating the complete specification
 		self.full_spec = self.full_spec.conjunction(self.bounded_control)
 	
+	# the goal of the following three functions is to spit out a cost function that can be 
+	# optimized over using an established technique
+	def determine_state(self, u):
+		# given an initial state and control --> determine the state of the system
+		pass
+
+	def rho(self, u):
+		# spit out a robustness function for the 
+		pass
+
+	def cost_function(self, u):
+		# packages up the robustness function so that it can be fed to the optimizer
+		pass
+	
 	def optimize(self, method):
+		# takes a guess and a method and spits out an optimal trajectory
 		pass				
 		
-		
+	def plot_trajectory(self):
+		# displays the trajectory that has been found to be optimal
+		pass

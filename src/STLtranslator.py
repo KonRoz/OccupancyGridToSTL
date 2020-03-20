@@ -84,25 +84,23 @@ class BaseSTLSpecification:
 
 class ReachAvoid(BaseSTLSpecification):
 
-	def __init__(self, map, time_bound, goal):
+	def __init__(self, map, time_bound, goal, accuracy):
 		super().__init__(map, time_bound)
 		
 		self.base_specification = super().generate_base_specification()		
 		self.goal = goal
+		self.accuracy = accuracy
 		
-		at_goal = super().in_rectangle_formula(self.goal[0], self.goal[0]+1, self.goal[1], self.goal[1]+1)
+		at_goal = super().in_rectangle_formula(self.goal[0] - self.accuracy, self.goal[0] + self.accuracy, self.goal[1] - self.accuracy, self.goal[1] + self.accuracy)
 		goal_achieved = at_goal.eventually(0, time_bound)
                
 		self.full_spec = self.base_specification.conjunction(goal_achieved)
 
-		print('success')
-	
-	
 	def display_region(self):
 		ax = super().add_obstacles_to_display()
 		
 		# adding goal region to the displayed map
-		ax.add_patch ( Rectangle( (self.goal[0] - 0.5, self.goal[1] - 0.5), 1, 1, color = 'green',alpha=0.5) )
+		ax.add_patch ( Rectangle( (self.goal[0] - self.accuracy, self.goal[1] - self.accuracy), self.accuracy, self.accuracy, color = 'green',alpha=0.5) )
 	
 		plt.show()
 
