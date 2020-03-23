@@ -11,22 +11,26 @@ my_occupany_grid = OccupancyGrid()
 # generating an STL specification for the occupancy grid and computing and optimal trajectory through the region
 def do_stuff_with_map(map):
 	# setting the parameters for the STL specification generator
-	time_bound = 20
-	goal = (12,12)
-	accuracy = 0.1
-	
+	time_bound = 40
+	goal = (20,10)
+	accuracy = 1
+	time_steps = time_bound + 1
+		
 	# setting the parameters for the optimizer
-	initial_state = np.array([0,0,0,0])[:,np.newaxis] 
-	u_guess = np.zeros(2, time_bound + 1)
+	initial_state = np.array([1,1,0,0])[:,np.newaxis] 
+	u_guess = np.zeros((2, time_steps))
 	
 	# optimization method
-	method = 'Nelder-Mead'
+	method = 'CG'
 
-	my_finished_specification = ReachAvoid(map, time_bound, goal, accuracy)
-	my_finished_specification.display_region()
+	my_reachavoid = ReachAvoid(map, time_bound, goal, accuracy)
+	ax = my_reachavoid.return_region()
+	my_finished_specification = my_reachavoid.full_spec
 
-	my_optimizer = Optimizer(initial_state, my_finished_specification, time_bound)
-	my_optimizer.optimizer(method)
+	my_optimizer = Optimizer(initial_state, my_finished_specification, time_bound, ax)
+	optimal_trajectory = my_optimizer.optimize(method)
+	print(optimal_trajectory)
+	my_optimizer.plot_trajectory(optimal_trajectory)
 
 # callback function for the map_subscriber --> stores the read occupancy grid in a global occupancy grid
 def map_listener_callback(data):
