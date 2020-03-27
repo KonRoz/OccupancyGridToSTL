@@ -100,7 +100,7 @@ class ReachAvoid(BaseSTLSpecification):
 		ax = super().add_obstacles_to_display()
 		
 		# adding goal region to the displayed map
-		ax.add_patch ( Rectangle( (self.goal[0] - self.accuracy, self.goal[1] - self.accuracy), self.accuracy, self.accuracy, color = 'green',alpha=0.5) )
+		ax.add_patch ( Rectangle( (self.goal[0] - self.accuracy, self.goal[1] - self.accuracy), 2*self.accuracy, 2*self.accuracy, color = 'green',alpha=0.5) )
 	
 		return ax
 

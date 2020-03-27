@@ -1,35 +1,35 @@
 #!/usr/bin/env python3
+
 import rospy
 import numpy as np
 from STLtranslator import ReachAvoid
 from nav_msgs.msg import OccupancyGrid
 from Optimizer import Optimizer
 
-
 my_occupany_grid = OccupancyGrid()
 
 # generating an STL specification for the occupancy grid and computing and optimal trajectory through the region
 def do_stuff_with_map(map):
 	# setting the parameters for the STL specification generator
-	time_bound = 40
-	goal = (20,10)
-	accuracy = 1
+	time_bound = 30
+	goal = (10.3,11.2)
+	accuracy = 0.2
 	time_steps = time_bound + 1
 		
 	# setting the parameters for the optimizer
-	initial_state = np.array([1,1,0,0])[:,np.newaxis] 
+	initial_state = np.asarray([11,0,8,0])[:,np.newaxis] 
 	u_guess = np.zeros((2, time_steps))
 	
 	# optimization method
-	method = 'CG'
+	method = 'Nelder-Mead'
 
 	my_reachavoid = ReachAvoid(map, time_bound, goal, accuracy)
 	ax = my_reachavoid.return_region()
 	my_finished_specification = my_reachavoid.full_spec
 
-	my_optimizer = Optimizer(initial_state, my_finished_specification, time_bound, ax)
+	my_optimizer = Optimizer(initial_state, my_finished_specification, time_bound, time_steps, u_guess, ax)
 	optimal_trajectory = my_optimizer.optimize(method)
-	print(optimal_trajectory)
+	print("robustness: %s" % (my_optimizer.rho(optimal_trajectory)))
 	my_optimizer.plot_trajectory(optimal_trajectory)
 
 # callback function for the map_subscriber --> stores the read occupancy grid in a global occupancy grid

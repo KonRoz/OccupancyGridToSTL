@@ -8,16 +8,18 @@ import matplotlib.pyplot as plt
 
 class Optimizer:
 		
-	def __init__(self, initial_state, full_spec, time_bound, ax):
+	def __init__(self, initial_state, full_spec, time_bound, time_steps, u_guess, ax):
 		self.initial_state = np.asarray(initial_state)
 		self.full_spec = full_spec
 		self.time_bound = time_bound
+		self.time_steps = time_steps
+		self.u_guess = np.asarray(u_guess)
 		self.ax = ax
 		
 		# setting up the control constraints --> rectangle for 2 controls (u1 & u2)
 		# lambda should output positive in desired scenario
-		u_min = -0.2
-		u_max = 0.2
+		u_min = -0.4
+		u_max = 0.4
 		u1_above_min = STLFormula(lambda s, t : s[t,2] - u_min)
 		u1_below_max = STLFormula(lambda s, t : -s[t,2] + u_max)
 		u2_above_min = STLFormula(lambda s, t : s[t,3] - u_min)
@@ -76,21 +78,19 @@ class Optimizer:
 		return cost_function
 	
 	def optimize(self, method):
-		# takes a guess and a method and spits out an optimal trajectory
-		u_guess = np.zeros((2,41)).flatten() 
-
-		optimized = minimize(self.cost_function, u_guess,
+		 
+		optimized = minimize(self.cost_function, self.u_guess,
 				method=method,
 				options={	
 						'disp':True,
 						'adaptive':True,
-						'maxiter':10000,
+						'maxiter':15000,
 						'fatol':1e-6,
 						'xatol':1e-6
 					}
 			)
 					
-		u_optimal = optimized.x.reshape((2,41))
+		u_optimal = optimized.x.reshape((2,self.time_steps))
 
 		return u_optimal	
 			
