@@ -11,8 +11,8 @@ my_occupany_grid = OccupancyGrid()
 # generating an STL specification for the occupancy grid and computing and optimal trajectory through the region
 def do_stuff_with_map(map):
 	# setting the parameters for the STL specification generator
-	time_bound = 30
-	goal = (10.3,11.2)
+	time_bound = 20
+	goal = (8.5,10.5)
 	accuracy = 0.2
 	time_steps = time_bound + 1
 		
@@ -21,7 +21,7 @@ def do_stuff_with_map(map):
 	u_guess = np.zeros((2, time_steps))
 	
 	# optimization method
-	method = 'Nelder-Mead'
+	method = 'L-BFGS-B'
 
 	my_reachavoid = ReachAvoid(map, time_bound, goal, accuracy)
 	ax = my_reachavoid.return_region()

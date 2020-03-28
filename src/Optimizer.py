@@ -18,8 +18,8 @@ class Optimizer:
 		
 		# setting up the control constraints --> rectangle for 2 controls (u1 & u2)
 		# lambda should output positive in desired scenario
-		u_min = -0.4
-		u_max = 0.4
+		u_min = -0.02
+		u_max = 0.02
 		u1_above_min = STLFormula(lambda s, t : s[t,2] - u_min)
 		u1_below_max = STLFormula(lambda s, t : -s[t,2] + u_max)
 		u2_above_min = STLFormula(lambda s, t : s[t,3] - u_min)
@@ -84,7 +84,7 @@ class Optimizer:
 				options={	
 						'disp':True,
 						'adaptive':True,
-						'maxiter':15000,
+						'maxiter':20000,
 						'fatol':1e-6,
 						'xatol':1e-6
 					}
