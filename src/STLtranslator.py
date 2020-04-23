@@ -52,6 +52,7 @@ class BaseSTLSpecification:
 			xmax = cell[0] + self.map.info.resolution
 			ymax = cell[1] + self.map.info.resolution
 			obstacle = self.in_rectangle_formula(cell[0], xmax, cell[1], ymax)
+			print('xmin = %s xmax = %s ymin = %s ymax = %s' % (cell[0], xmax, cell[1], ymax) ) 
                 	# STL formula is currently defined as inside the obstacle --> not outside --> thus negation is used
                 	# The obstacles should always be avoided --> make sure t interval includes interesting part of signal (i.e. the part of the trajectory
                 	# that we are interested in analyzing the robustness score for

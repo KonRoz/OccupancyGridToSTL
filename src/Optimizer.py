@@ -9,17 +9,18 @@ import matplotlib.pyplot as plt
 class Optimizer:
 		
 	def __init__(self, initial_state, full_spec, time_bound, time_steps, u_guess, ax):
-		self.initial_state = np.asarray(initial_state)
+		self.x0 = np.asarray(initial_state)
 		self.full_spec = full_spec
 		self.time_bound = time_bound
 		self.time_steps = time_steps
 		self.u_guess = np.asarray(u_guess)
 		self.ax = ax
 		
+			
 		# setting up the control constraints --> rectangle for 2 controls (u1 & u2)
 		# lambda should output positive in desired scenario
-		u_min = -0.02
-		u_max = 0.02
+		u_min = -0.2
+		u_max = 0.2
 		u1_above_min = STLFormula(lambda s, t : s[t,2] - u_min)
 		u1_below_max = STLFormula(lambda s, t : -s[t,2] + u_max)
 		u2_above_min = STLFormula(lambda s, t : s[t,3] - u_min)
@@ -33,49 +34,90 @@ class Optimizer:
 
 		# formulating the complete specification
 		self.full_spec = self.full_spec.conjunction(self.bounded_control)
-	
+		
+		
 	# the goal of the following three functions is to spit out a cost function that can be 
 	# optimized over using an established technique
-	def determine_state(self, u):
-		# given an initial state and control --> determine the state of the system
+	def STL_signal(self, u):
+		""" 
+		Maps a control signal u and an initial condition to an STL signal we can check. 
+		This signal we will check is composed of the (x,y) position of the robot 
+		and the control inputs.
+
+		Arguments:
+		u   : a (2,T) numpy array representing the control sequence
+
+		Returns:
+		s   : a (4,T) numpy array representing the signal we'll check
+		"""
+		# System definition: x_{t+1} = A*x_t + B*u_t
 		A = np.array([[1,1,0,0],[0,1,0,0],[0,0,1,1],[0,0,0,1]])
 		B = np.array([[0,0],[1,0],[0,0],[0,1]])
 
-		time_steps = u.shape[1]
+		T = u.shape[1]      # number of timesteps
 
-		signal = np.zeros((4,time_steps))
+		# Pre-alocate the signal
+		s = np.zeros((4,T))
 
-		x = copy(self.initial_state)
-		for t in range(time_steps):
-			signal[0:2,t] = x[[0,2],:].flatten()
-			signal[2:4,t] = u[:,t]
+		# Run the controls through the system and see what we get
+		x = copy(self.x0)
+		for t in range(T):
+			# extract the first and third elements of x
+			s[0:2,t] = x[[0,2],:].flatten()
+			s[2:4,t] = u[:,t]
 
-			x = A@x + B@u[:,t][:,np.newaxis]
+			# Update the system state
+			x = A@x + B@u[:,t][:,np.newaxis]   # ensure u is of shape (2,1) before applying
 
-		return signal
+		return s
 
-	def rho(self, u):
-		# spit out a robustness function for the cost function
-		signal = self.determine_state(u)
-		rho = self.full_spec.robustness(signal.T, 0)
+	def rho(self, u, spec=None):
+		"""
+		For a given initial state and control sequence u, calculates rho,
+		a scalar value which indicates the degree of satisfaction of the specification.
+
+		Arguments:
+		u    : a (2,T) numpy array representing the control sequence
+		spec : an STLFormula to evaluate (the full specification by default)
+
+		Returns:
+		rho  : a scalar value indicating the degree of satisfaction. Positive values
+		indicate that the specification is satisfied.
+		"""
+		# By default, evaluate the full specification. Otherwise you could pass it 
+		# a different formula, such as the (sub)specification for obstacle avoidance.
+		if spec is None:
+			spec = self.full_spec
 		
+		s = self.STL_signal(u)
+		rho = spec.robustness(s.T, 0)
+
 		return rho
 
 	def cost_function(self, u):
-		# packages up the robustness function so that it can be fed to the optimizer
-		
-		# u is the flattened control sequence --> dim = 1xmT
-		u = np.asarray(u)
-		
-		# determining the number of time steps in the control sequence and using it to reshape u 
-		time_steps = int(len(u)/2)
-		u = u.reshape((2,time_steps))
-		
- 		# rho computes the robustness value for the particular number of time steps
-		cost_function = - self.rho(u)
+		"""
+		Defines a cost function over the control sequence u such that
+		the optimal u maximizes the robustness degree of the specification.
 
-		# the cost function is what can be optimized using scipy
-		return cost_function
+		Arguments:
+		u    : a (m*T,) flattened numpy array representing a tape of control inputs
+
+		Returns:
+		J    : a scalar value indicating the degree of satisfaction of the specification.
+		(negative ==> satisfied)
+		"""
+		# enforce that the input is a numpy array
+		u = np.asarray(u)
+
+		# Reshape the control input to (mxT). Vector input is required for some optimization libraries
+		T = int(len(u)/2)
+		u = u.reshape((2,T))
+
+		J = - self.rho(u)
+		print(u)	
+		print(J)
+		return J
+
 	
 	def optimize(self, method):
 		 
@@ -84,7 +126,7 @@ class Optimizer:
 				options={	
 						'disp':True,
 						'adaptive':True,
-						'maxiter':20000,
+						'maxiter':15000,
 						'fatol':1e-6,
 						'xatol':1e-6
 					}
@@ -96,11 +138,11 @@ class Optimizer:
 			
 	def plot_trajectory(self, u):
 		# displays the trajectory that has been found to be optimal
-		state = self.determine_state(u)
+		state = self.STL_signal(u)
 
 		x_coordinates = state[0,:]
 		y_coordinates = state[1,:]
 
-		self.ax.scatter(x_coordinates, y_coordinates)
+		self.ax.plot(x_coordinates, y_coordinates, linestyle="-", marker="o")
 
 		plt.show()
