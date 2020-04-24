@@ -112,27 +112,32 @@ class Optimizer:
 		# Reshape the control input to (mxT). Vector input is required for some optimization libraries
 		T = int(len(u)/2)
 		u = u.reshape((2,T))
-
+		
 		J = - self.rho(u)
-		print(u)	
+		
+		np.savetxt(self.control_output, u, delimiter=",")	
 		print(J)
+		print(u)
 		return J
 
 	
 	def optimize(self, method):
-		 
+		self.control_output = open("controls.out", "ab") 
+ 
 		optimized = minimize(self.cost_function, self.u_guess,
 				method=method,
 				options={	
 						'disp':True,
 						'adaptive':True,
-						'maxiter':15000,
+						'maxiter':30000,
 						'fatol':1e-6,
 						'xatol':1e-6
 					}
 			)
 					
 		u_optimal = optimized.x.reshape((2,self.time_steps))
+		
+		self.control_output.close()
 
 		return u_optimal	
 			

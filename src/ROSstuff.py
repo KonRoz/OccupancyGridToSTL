@@ -12,12 +12,12 @@ my_occupany_grid = OccupancyGrid()
 def do_stuff_with_map(map):
 	# setting the parameters for the STL specification generator
 	time_bound = 20
-	goal = (8.5,10.5)
+	goal = (10.2,11.5)
 	accuracy = 0.2
 	time_steps = time_bound + 1
 		
 	# setting the parameters for the optimizer
-	initial_state = np.asarray([11,0,8,0])[:,np.newaxis] 
+	initial_state = np.asarray([7.6,0,7.8,0])[:,np.newaxis] 
 	u_guess = np.zeros((2, time_steps))
 	
 	# optimization method

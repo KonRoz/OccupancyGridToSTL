@@ -71,8 +71,8 @@ class BaseSTLSpecification:
 	def add_obstacles_to_display(self):
                 # plotting the map
 		fig, ax = plt.subplots(1)
-		ax.set_xlim(0, self.map.info.width * self.map.info.resolution)
-		ax.set_ylim(0, self.map.info.height * self.map.info.resolution)
+		ax.set_xlim(-1, self.map.info.width * self.map.info.resolution*2)
+		ax.set_ylim(-1, self.map.info.height * self.map.info.resolution*2)
 
 		for cell in self.occupied_cells:
 			x_coordinate = cell[0]

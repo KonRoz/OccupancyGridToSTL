@@ -16,7 +16,7 @@ def create_test_occupancy_grid():
 	my_test_occupancy_grid.info.resolution = 1.0
 	 
 	# test map obstacles
-	my_test_occupancy_grid.data = [0,100,0,0,0,0,100,100,100]
+	my_test_occupancy_grid.data = [0,100,0,0,100,0,0,0,0]
 
 	do_stuff_with_map(my_test_occupancy_grid)
 
@@ -27,16 +27,16 @@ def do_stuff_with_map(map):
 
         # setting the parameters for the STL specification generator
         time_bound = 20
-        goal = (0.5, 3.5)
-        accuracy = 0.2
+        goal = (3.5, 1)
+        accuracy = 0.75
         time_steps = time_bound + 1
 
         # setting the parameters for the optimizer
-        initial_state = np.asarray([0,0,0,0])[:,np.newaxis]
+        initial_state = np.asarray([-0.5,0,-0.5,0])[:,np.newaxis]
         u_guess = np.zeros((2, time_steps)).flatten()
 
         # optimization method
-        method = 'Nelder-Mead'
+        method = 'Powell'
 
         my_reachavoid = ReachAvoid(map, time_bound, goal, accuracy)
         ax = my_reachavoid.return_region()
@@ -47,10 +47,6 @@ def do_stuff_with_map(map):
         print("robustness: %s" % (my_optimizer.rho(optimal_trajectory)))
         my_optimizer.plot_trajectory(optimal_trajectory)	
         
-        ''' 
-        my_optimizer.plot_trajectory(np.asarray([[0.01330118, 0.01722613, 0.06619321, 0.0378914, 0.08764102, -0.01913139, 0.04494609, -0.01650196, -0.04589104, -0.03240899, 0.06242584, -0.00333347, -0.04715201, -0.02785758, 0.02584856, -0.07566842, -0.06440088, 0.05272855, -0.08763807, 0.00148727, -0.04923343], [0.03780754, 0.00369348, 0.02694225, -0.00477653, -0.01092062, -0.02311087, -0.01213407, 0.02055181, -0.00379446, 0.06702059, 0.0472324, 0.03970993, 0.03640072, 0.01647697, 0.02178436, -0.00282679, -0.02927775, -0.01250581, -0.05840783, -0.05287277, -0.01370572]])) 
-        '''
-	
         print(my_reachavoid.full_spec)
 
 if __name__ == '__main__':
