@@ -3,10 +3,10 @@
 ## Dependencies <br />
 
 ### Python <br /> 
-numpy <br />
+NumPy <br />
 pySTL <br />
-matplotlib <br />
-scipy <br />
+Matplotlib <br />
+SciPy <br />
 
 ***This project targeted Python 3***
 
@@ -64,7 +64,7 @@ In Home Directory (or where the map.yaml and map.pgm files are located) <br />
 [REMOTE] -->rosrun OccupancyGridToSTL ROSstuff.py <br />
 
 ### Test.py <br />
-In Home Directory
+In Home Directory <br />
 [REMOTE] --> roscd OccupancyGridToSTL/src <br />
 [REMOTE] --> python3 Test.py <br />
 
