@@ -1,14 +1,19 @@
-### OccupancyGridToSTL
-## Dependencies <br /> 
+# OccupancyGridToSTL
+
+## Dependencies <br />
+
+### Python <br /> 
 numpy <br />
 pySTL <br />
 matplotlib <br />
 scipy <br />
 
-## ROS dependencies <br /> 
+***This project targeted Python 3***
+
+### ROS <br /> 
 map_server 
 
-***This project targetted ROS Kinetic***
+***This project targeted ROS Kinetic***
 
 ## Project Description <br />
 Presently, this is a ROS node which retrieves an occupany grid, generates an STL (i.e. signal temporal logic) specification 
@@ -37,12 +42,12 @@ For information concerning the reason for the development of this project please
 
 ## Prerun Instructions <br/>
 
-# Changing Map Cell Dimensions <br /> 
+### Changing Map Cell Dimensions <br /> 
 [REMOTE] --> roscd turtlebot3_slam/launch/ <br />
 [REMOTE] --> vim turtlebot3.gmapping.launch <br />
 Once there scroll down to param name="delta" value="[desired_delta]" and input desired value  
 
-# Creating Map <br /> 
+### Creating Map <br /> 
 [REMOTE] --> roscore <br />
 [REMOTE] --> ssh pi@[PI_URI] <br />
 [TURTLEBOT] --> roslaunch turtlebot3_bringup turtlebot3_robot.launch <br />
@@ -52,18 +57,18 @@ Once there scroll down to param name="delta" value="[desired_delta]" and input d
 
 ## Run Instructions <br />
 
-# ROSstuff.py <br /> 
+### ROSstuff.py <br /> 
 In Home Directory (or where the map.yaml and map.pgm files are located) <br />
 [REMOTE] -->roscore <br />
 [REMOTE] -->rosrun map_server map_server [map_yaml_file] <br /> 
 [REMOTE] -->rosrun OccupancyGridToSTL ROSstuff.py <br />
 
-# Test.py <br />
+### Test.py <br />
 In Home Directory
 [REMOTE] --> roscd OccupancyGridToSTL/src <br />
 [REMOTE] --> python3 Test.py <br />
 
-# Trajectories.py <br />
+### Trajectories.py <br />
 In Home Directory <br />
 [REMOTE] --> roscd OccupancyGridToSTL/src <br />
 [REMOTE] --> rm -rf controls.out <br />
