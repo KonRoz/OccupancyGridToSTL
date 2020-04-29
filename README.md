@@ -73,11 +73,11 @@ In Home Directory <br />
 [REMOTE] --> roscd OccupancyGridToSTL/src <br />
 [REMOTE] --> rm -rf controls.out <br />
 [REMOTE] run either ROSstuff.py or Test.py <br />
-**if running Test.py, make sure that the optimizer being used is the double integrator model**
+**if running Test.py, make sure that the optimizer being used is the double integrator model** <br />
 [REMOTE] --> python3 Trajectories.py <br />
 
 **Generating the optimal trajectory and displaying it may take several minutes 
 depending on the optimization parameters and STL specification**
 
-**To terminate problem --> first cancel the matplotlib window --> keyboard interrupt (control c) takes significantly longer** 
+**To terminate program --> first cancel the matplotlib window --> keyboard interrupt (control c) takes significantly longer** 
 
