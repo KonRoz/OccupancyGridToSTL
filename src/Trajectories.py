@@ -26,7 +26,7 @@ def create_test_occupancy_grid():
 # optimized over using an established technique
 def STL_signal(u):
 
-	x0 = initial_state = np.asarray([-0.5,0,-0.5,0])[:,np.newaxis]
+	x0 = initial_state = np.asarray([0.5,0,0.5,0])[:,np.newaxis]
 
 	# System definition: x_{t+1} = A*x_t + B*u_t
 	A = np.array([[1,1,0,0],[0,1,0,0],[0,0,1,1],[0,0,0,1]])
@@ -62,8 +62,8 @@ def plot_a_trajectory(u, ax):
 def plot_all_the_trajectories(map):
 
 	time_bound = 20
-	goal = (1.5, 4)
-	accuracy = 0.75
+	goal = (3, 1)
+	accuracy = 0.25
 	time_steps = time_bound + 1
 
 	my_reachavoid = ReachAvoid(map, time_bound, goal, accuracy)

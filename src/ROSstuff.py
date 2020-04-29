@@ -4,6 +4,8 @@ import rospy
 import numpy as np
 from STLtranslator import ReachAvoid
 from nav_msgs.msg import OccupancyGrid
+# comment the model not in use
+#from OptimizerSingleIntegrator import OptimizerSingleIntegrator as Optimizer
 from Optimizer import Optimizer
 
 my_occupany_grid = OccupancyGrid()
@@ -12,16 +14,16 @@ my_occupany_grid = OccupancyGrid()
 def do_stuff_with_map(map):
 	# setting the parameters for the STL specification generator
 	time_bound = 20
-	goal = (10.2,11.5)
-	accuracy = 0.2
+	goal = (11.1,8.8)
+	accuracy = 0.45
 	time_steps = time_bound + 1
 		
 	# setting the parameters for the optimizer
-	initial_state = np.asarray([7.6,0,7.8,0])[:,np.newaxis] 
+	initial_state = np.asarray([7.9,0,11,0])[:,np.newaxis] 
 	u_guess = np.zeros((2, time_steps))
 	
 	# optimization method
-	method = 'L-BFGS-B'
+	method = 'Nelder-Mead'
 
 	my_reachavoid = ReachAvoid(map, time_bound, goal, accuracy)
 	ax = my_reachavoid.return_region()

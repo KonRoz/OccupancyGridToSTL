@@ -4,6 +4,9 @@ import rospy
 import numpy as np
 from STLtranslator import ReachAvoid
 from nav_msgs.msg import OccupancyGrid
+
+# Comment whichever optimizer is not being used at the time --> also make sure to change x0 to a vector length of 4
+#from OptimizerSingleIntegrator import OptimizerSingleIntegrator as Optimizer
 from Optimizer import Optimizer
 
 # creating a occupancy grid with which to test the route optimization
@@ -27,13 +30,14 @@ def do_stuff_with_map(map):
 
         # setting the parameters for the STL specification generator
         time_bound = 20
-        goal = (3.5, 1)
-        accuracy = 0.75
+        goal = (3, 1)
+        accuracy = 0.25
         time_steps = time_bound + 1
 
         # setting the parameters for the optimizer
-        initial_state = np.asarray([-0.5,0,-0.5,0])[:,np.newaxis]
+        initial_state = np.asarray([0.5,0,0.5,0])[:,np.newaxis]
         u_guess = np.zeros((2, time_steps)).flatten()
+        u_guess = np.asarray([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]])
 
         # optimization method
         method = 'Powell'
